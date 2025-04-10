@@ -1,0 +1,31 @@
+name: ventoy-cpio release
+
+# creates a manually-activatable workflow run button
+# in the GitHub Actions web UI
+on:
+  workflow_dispatch:
+    inputs:
+      release_description:
+        description: Description that will be visible in the release page
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      - name: Run docker compose
+        run: |
+          docker compose build
+          docker compose up
+
+      - name: Create release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ventoy*
+          tag: ${{ github.ref }}
+          overwrite: true
+          body: ${{ github.event.inputs.release_description }}
